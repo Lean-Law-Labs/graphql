@@ -22,6 +22,7 @@ import { createAuthAndParams } from "./create-auth-and-params";
 import type { Neo4jGraphQL } from "../classes";
 import { NodeBuilder } from "../../tests/utils/builders/node-builder";
 import { ContextBuilder } from "../../tests/utils/builders/context-builder";
+import { RelationshipQueryDirectionOption } from "../constants";
 
 describe("createAuthAndParams", () => {
     describe("operations", () => {
@@ -91,6 +92,25 @@ describe("createAuthAndParams", () => {
             expect(result[1]).toMatchObject({
                 thisauth_param0: sub,
             });
+
+            // testing "where_in"
+            const node2 = new NodeBuilder({
+                name: "Movie",
+                primitiveFields: [idField],
+                auth: {
+                    rules: [{ where_in: { id: "$jwt.sub" } }, { operations: ["READ"] }, { roles: ["admin"] }],
+                    type: "JWT",
+                },
+            }).instance();
+
+            const result2 = createAuthAndParams({
+                context,
+                entity: node2,
+                operations: "READ",
+                whereIn: { node: node, varName: "this" },
+            });
+
+            expect(result2).toBeTruthy();
         });
 
         test("should combine roles with where across rules", () => {
@@ -396,7 +416,12 @@ describe("createAuthAndParams", () => {
                 name: "Movie",
                 primitiveFields: [idField],
                 auth: {
-                    rules: [{ OR: [{ allow: { id: "$jwt.sub" } }, { roles: ["admin"] }] }],
+                    // rules: [{ OR: [{ where_in: { id: "$jwt.sub" } }, { roles: ["admin"] }] }],
+                    rules: [
+                        {
+                            where_in: { OR: [{ id: "$jwt.sub" }, { id: "$jwt.sub" }] },
+                        },
+                    ],
                     type: "JWT",
                 },
             }).instance();
@@ -419,7 +444,7 @@ describe("createAuthAndParams", () => {
             const result = createAuthAndParams({
                 context,
                 entity: node,
-                allow: { parentNode: node, varName: "this" },
+                whereIn: { node: node, varName: "this" },
             });
 
             expect(result[0]).toMatchInlineSnapshot(

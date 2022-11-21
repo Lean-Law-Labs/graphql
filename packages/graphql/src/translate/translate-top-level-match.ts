@@ -91,11 +91,12 @@ export function createMatchClause({
         if (whereOp) matchQuery.where(whereOp);
     }
 
+    const foundWhereIn = node.auth?.rules.find((rule) => "where_in" in rule);
     const whereAuth = createAuthAndParams({
         operations: operation,
         entity: node,
         context,
-        where: { varName: matchNode, node },
+        ...(foundWhereIn ? { whereIn: { varName: matchNode, node } } : { where: { varName: matchNode, node } }),
     });
     if (whereAuth[0]) {
         const authQuery = new Cypher.RawCypher(() => {

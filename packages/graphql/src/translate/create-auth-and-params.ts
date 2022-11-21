@@ -47,6 +47,12 @@ interface Where {
     chainStr?: string;
 }
 
+interface WhereIn {
+    varName: string | Cypher.Node;
+    node: Node;
+    chainStr?: string;
+}
+
 export function createAuthAndParams({
     entity,
     operations,
@@ -57,6 +63,7 @@ export function createAuthAndParams({
     escapeQuotes,
     bind,
     where,
+    whereIn,
 }: {
     entity: Node | BaseField;
     operations?: AuthOperations | AuthOperations[];
@@ -67,6 +74,7 @@ export function createAuthAndParams({
     escapeQuotes?: boolean;
     bind?: Bind;
     where?: Where;
+    whereIn?: WhereIn;
 }): [string, Record<string, any>] {
     const authPredicate = createAuthPredicates({
         entity,
@@ -78,6 +86,7 @@ export function createAuthAndParams({
         escapeQuotes,
         bind,
         where,
+        whereIn,
     });
     if (!authPredicate) return ["", {}];
 
@@ -85,7 +94,7 @@ export function createAuthAndParams({
         return authPredicate.getCypher(env);
     });
 
-    const chainStr = generateUniqueChainStr([where?.varName, allow?.varName, bind?.varName]);
+    const chainStr = generateUniqueChainStr([where?.varName, whereIn?.varName, allow?.varName, bind?.varName]);
 
     // Params must be globally unique, variables can be just slightly different, as each auth statement is scoped
     const authCypher = authPredicateExpr.build({ params: `${chainStr}auth_`, variables: `auth_` });
@@ -111,6 +120,7 @@ export function createAuthPredicates({
     escapeQuotes,
     bind,
     where,
+    whereIn,
 }: {
     entity: Node | BaseField;
     operations?: AuthOperations | AuthOperations[];
@@ -121,6 +131,7 @@ export function createAuthPredicates({
     escapeQuotes?: boolean;
     bind?: Bind;
     where?: Where;
+    whereIn?: WhereIn;
 }): Cypher.Predicate | undefined {
     if (!entity.auth) {
         return undefined;
@@ -136,6 +147,13 @@ export function createAuthPredicates({
     if (where && !authRules.some(hasWhere)) {
         return undefined;
     }
+    const hasWhereIn = (rule: BaseAuthRule): boolean =>
+        !!(rule.where_in || rule.AND?.some(hasWhereIn) || rule.OR?.some(hasWhereIn));
+
+    if (whereIn && !authRules.some(hasWhereIn)) {
+        return undefined;
+    }
+
     const subPredicates = authRules.map((authRule: AuthRule) => {
         const predicate = createSubPredicate({
             authRule,
@@ -146,6 +164,7 @@ export function createAuthPredicates({
             escapeQuotes,
             bind,
             where,
+            whereIn,
         });
 
         return predicate;
@@ -169,6 +188,7 @@ function createSubPredicate({
     escapeQuotes,
     bind,
     where,
+    whereIn,
 }: {
     authRule: AuthRule | BaseAuthRule;
     skipRoles?: boolean;
@@ -178,6 +198,7 @@ function createSubPredicate({
     escapeQuotes?: boolean;
     bind?: Bind;
     where?: Where;
+    whereIn?: WhereIn;
 }): Cypher.Predicate | undefined {
     const thisPredicates: Cypher.Predicate[] = [];
     const authParam = new Cypher.NamedParam("auth");
@@ -228,6 +249,7 @@ function createSubPredicate({
                 escapeQuotes,
                 bind,
                 where,
+                whereIn,
             });
 
             if (!predicate) {
@@ -263,6 +285,21 @@ function createSubPredicate({
         }
     }
 
+    if (whereIn && authRule.where_in) {
+        const nodeRef = getOrCreateCypherNode(whereIn.varName);
+
+        const whereInPredicate = createAuthPredicate({
+            context,
+            node: whereIn.node,
+            nodeRef,
+            rule: authRule,
+            kind: "where_in",
+        });
+        if (whereInPredicate) {
+            thisPredicates.push(whereInPredicate);
+        }
+    }
+
     if (bind && authRule.bind) {
         const nodeRef = getOrCreateCypherNode(bind.varName);
 
@@ -292,7 +329,7 @@ function createAuthPredicate({
     nodeRef: Cypher.Node;
     node: Node;
     rule: AuthRule;
-    kind: "allow" | "bind" | "where";
+    kind: "allow" | "bind" | "where" | "where_in";
 }): Cypher.Predicate | undefined {
     if (!rule[kind]) {
         return undefined;
@@ -439,7 +476,7 @@ function createRelationshipPredicate({
     }
 
     let predicateFunction: Cypher.PredicateFunction;
-    if (kind === "allow") {
+    if (kind === "allow" || kind === "where_in") {
         predicateFunction = Cypher.any(
             targetNodeRef,
             new Cypher.PatternComprehension(innerPattern, targetNodeRef),

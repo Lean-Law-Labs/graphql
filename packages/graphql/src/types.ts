@@ -66,6 +66,7 @@ export interface BaseAuthRule {
     allow?: { [k: string]: any } | "*";
     bind?: { [k: string]: any } | "*";
     where?: { [k: string]: any } | "*";
+    where_in?: { [k: string]: any } | "*";
     roles?: string[];
     AND?: BaseAuthRule[];
     OR?: BaseAuthRule[];
@@ -356,7 +357,7 @@ export interface CypherQueryOptions {
 }
 
 /** Input field for graphql-compose */
-export type InputField = { type: string; defaultValue?: string, directives?: Directive[] } | string;
+export type InputField = { type: string; defaultValue?: string; directives?: Directive[] } | string;
 
 export interface Neo4jGraphQLAuthPlugin {
     rolesPath?: string;

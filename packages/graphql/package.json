@@ -22,7 +22,7 @@
         "dist/**/*.js.map"
     ],
     "scripts": {
-        "clean": "cd src/ && tsc --build --clean",
+        "clean": "tsc --build --clean src/tsconfig.production.json",
         "test": "jest",
         "test:unit": "jest src --coverage=true -c jest.minimal.config.js",
         "test:unit:watch": "jest src --watch -c jest.minimal.config.js",

@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import type { DirectiveNode} from "graphql";
+import type { DirectiveNode } from "graphql";
 import { valueFromASTUntyped } from "graphql";
 import type { Auth, AuthRule, AuthOperations } from "../types";
 
@@ -28,6 +28,7 @@ const validFields = [
     "OR",
     "allow",
     "where",
+    "where_in",
     "bind",
     "isAuthenticated",
     "allowUnauthenticated",
