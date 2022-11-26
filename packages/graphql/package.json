@@ -1,5 +1,5 @@
 {
-    "name": "@neo4j/graphql",
+    "name": "@lean-law-labs/graphql",
     "version": "3.12.2",
     "description": "A GraphQL to Cypher query execution layer for Neo4j and JavaScript GraphQL implementations",
     "keywords": [
@@ -12,6 +12,7 @@
         "url": "https://github.com/neo4j/graphql/issues"
     },
     "homepage": "https://github.com/neo4j/graphql/tree/dev/packages/graphql",
+    "repository": "https://github.com/Lean-Law-Labs/graphql",
     "exports": "./dist/index.js",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -21,6 +22,9 @@
         "dist/**/*.js",
         "dist/**/*.js.map"
     ],
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
     "scripts": {
         "clean": "tsc --build --clean src/tsconfig.production.json",
         "test": "jest",

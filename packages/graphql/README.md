@@ -1,4 +1,6 @@
-# @neo4j/graphql
+# @lean-law-labs/graphql
+
+:sparkle: This is a fork of [@neo4j/graphql](https://github.com/neo4j/graphql)
 
 <p align="center">
   <a href="https://badge.fury.io/js/%40neo4j%2Fgraphql">
@@ -17,6 +19,21 @@ A GraphQL to Cypher query execution layer for Neo4j and JavaScript GraphQL imple
 1. [Documentation](https://neo4j.com/docs/graphql-manual/current/)
 
 ## Installation
+
+-----
+
+:note: This section is specific to the forked version
+
+Create a Github [Personal Access Token (classic)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic)
+to use the private Github Registry. You need the scopes `read:packages` and `write:packages`.
+
+* Add your token to `.npmrc` by replacing `TOKEN`
+
+```text
+//npm.pkg.github.com/:_authToken=TOKEN
+```
+
+-----
 
 ```
 $ npm install @neo4j/graphql
