@@ -21,8 +21,9 @@ A GraphQL to Cypher query execution layer for Neo4j and JavaScript GraphQL imple
 ## Installation
 
 -----
+### Fork Information
 
-:note: This section is specific to the forked version
+:octocat: _This section is specific to the forked version_
 
 Create a Github [Personal Access Token (classic)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic)
 to use the private Github Registry. You need the scopes `read:packages` and `write:packages`.
