@@ -88,15 +88,12 @@ export function createProjectionSubquery({
         });
         if (wherePredicate) subqueryMatch.where(wherePredicate);
     }
-
+    const foundWhereIn = node.auth?.rules.find((rule) => "where_in" in rule);
     const whereAuth = createAuthPredicates({
         entity: node,
         operations: "READ",
         context,
-        where: {
-            varName: alias,
-            node,
-        },
+        ...(foundWhereIn ? { whereIn: { varName: alias, node } } : { where: { varName: alias, node } }),
     });
 
     if (whereAuth) {
